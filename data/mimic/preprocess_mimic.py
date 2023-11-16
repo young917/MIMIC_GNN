@@ -22,7 +22,7 @@ class EncounterInfo(object):
         self.encounter_id = encounter_id # 'HADM_ID'
         # self.encounter_timestamp = encounter_timestamp # 'ADMITTIME'
         self.expired = expired # 'HOSPITAL_EXPIRE_FLAG'
-        self.dx_ids = [] # Diagnosis - 'ICD9_CODE'
+        self.dx_ids = [] # Diagnosis - 'NDC CODE' // 'ICD9_CODE'
         self.rx_ids = [] 
         self.labs = {} 
         self.physicals = []
@@ -204,35 +204,36 @@ def build_seqex(enc_dict,
                 continue
 
         # filtering patients with proper number of dx_ids, treatments and labvalues (1-50)
-#         if len(set(enc.dx_ids)) < min_num_codes:
-#             min_dx_cut += 1
-#             continue
+        if len(set(enc.dx_ids)) < min_num_codes:
+            min_dx_cut += 1
+            continue
 
-#         if len(set(enc.treatments)) < min_num_codes:
-#             min_treatment_cut += 1
-#             continue
+        if len(set(enc.treatments)) < min_num_codes:
+            min_treatment_cut += 1
+            continue
 
-#         if len(set(enc.labvalues)) < min_num_codes:
-#             min_lab_cut += 1
-#             continue
+        if len(set(enc.dx_ids)) > max_num_codes:
+            max_dx_cut += 1
+            continue
 
-#         if len(set(enc.dx_ids)) > max_num_codes:
-#             max_dx_cut += 1
-#             continue
+        if len(set(enc.treatments)) > max_num_codes:
+            max_treatment_cut += 1
+            continue
 
-#         if len(set(enc.treatments)) > max_num_codes:
-#             max_treatment_cut += 1
-#             continue
-
-#         if labflag and len(set(enc.labvalues)) > max_num_codes:
-#             max_lab_cut += 1
-#             continue
+        if labflag:
+            if len(set(enc.labvalues)) < min_num_codes:
+                min_lab_cut += 1
+                continue
+            if len(set(enc.labvalues)) > max_num_codes:
+                max_lab_cut += 1
+                continue
 
         count += 1
         num_dx_ids += len(enc.dx_ids)
         num_treatments += len(enc.treatments)
         num_unique_dx_ids += len(set(enc.dx_ids))
         num_unique_treatments += len(set(enc.treatments))
+        
         if labflag:
             num_labs += len(enc.labvalues)
             num_unique_labs += len(set(enc.labvalues))
@@ -428,10 +429,12 @@ def main():
     train_seqex = get_partitions(seqex_list, set(train_ids))
     val_seqex = get_partitions(seqex_list, set(val_ids))
     test_seqex = get_partitions(seqex_list, set(test_ids))
-    print(len(train_seqex), len(val_seqex), len(test_seqex))
+    print(len(train_seqex), len(val_seqex), len(test_seqex), len(train_seqex)+len(val_seqex)+len(test_seqex))
     
     pickle.dump(dx_map, open(output_path + '/dx_map.p', 'wb'), -1)
+    print("# dx:", len(dx_map))
     pickle.dump(proc_map, open(output_path + '/proc_map.p', 'wb'), -1)
+    print("# proc:", len(proc_map))
     if args.exist_lab:
         pickle.dump(lab_map, open(output_path + '/lab_map.p', 'wb'), -1)
     print("Split done.")

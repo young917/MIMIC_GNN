@@ -73,6 +73,8 @@ def main():
     model = nn.DataParallel(model, device_ids=device_ids)
     val_loader = DataLoader(dataset=EHRData(val_x, val_y), batch_size=BATCH_SIZE,
                             collate_fn=collate_fn, num_workers=torch.cuda.device_count(), shuffle=False)
+    test_loader = DataLoader(dataset=EHRData(test_x, test_y), batch_size=BATCH_SIZE,
+                            collate_fn=collate_fn, num_workers=torch.cuda.device_count(), shuffle=False)
     optimizer = optim.Adam([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=1e-8)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
 
@@ -102,6 +104,12 @@ def main():
                           (epoch + 1, total_loss[0]/idx, total_loss[1]/idx, total_loss[2]/idx))
         t.refresh()
         scheduler.step()
+        
+    print("End Training")
+    val_auprc, _ = evaluate(model, val_loader, len(val_y))
+    test_auprc, _ = evaluate(model, test_loader, len(val_y))
+    logging.info('[END] AUPRC-Valid:%f; AUPRC-Test: %f' % (val_auprc, test_auprc))
+    print('[END] AUPRC-Valid:%f; AUPRC-Test: %f' % (val_auprc, test_auprc))
 
 
 if __name__ == '__main__':
