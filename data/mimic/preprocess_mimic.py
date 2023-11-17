@@ -313,7 +313,7 @@ def build_seqex(enc_dict,
     return key_list, seqex_list, dx_str2int, treat_str2int, lab_str2int
 
 
-def train_val_test_split(patient_ids, random_seed=0):
+def train_val_test_split(patient_ids, random_seed=100):
     train_ids, test_ids = model_selection.train_test_split(patient_ids, test_size=0.2, random_state=random_seed)
     test_ids, val_ids = model_selection.train_test_split(test_ids, test_size=0.5, random_state=random_seed)
     return train_ids, val_ids, test_ids
