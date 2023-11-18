@@ -45,6 +45,7 @@ def evaluate(model, data_iter, length):
         y_prob[pointer: pointer + batch_size] = probability.cpu().numpy()
         pointer += batch_size
     precision, recall, thresholds = precision_recall_curve(y_true, y_prob)
+    
     return auc(recall, precision), (y_pred, y_prob, y_true)
 
 
