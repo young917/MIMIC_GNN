@@ -1,16 +1,49 @@
 # Variationally Regularized Graph-based Representation Learning for Electronic Health Records
 
-This repository contains the code for the paper [Variationally Regularized Graph-based Representation Learning for Electronic Health Records](https://arxiv.org/abs/1912.03761).
-
 ## Introduction
-In this paper, we design a novel graph-based model to generalize the ability of learning implicit medical concept structures to a wide range of data source, including short-term ICU data and long-term outpatient clinical data.We introduce variational regularization for node representation learning, addressing the insufficiency of self-attention in graph-based models, and difficulties of manually constructing knowledge graph from real-world noisy data sources. The novelty of our work is to enhance the learning of attention weights in GNN via regularization on node representations. Besides obtaining better performances in different predictive tasks, we also provide interpretation on the effect of variational regularization in graph neural networks using singular value analysis, and bridge the connection between singular values
-and representation clustering.
+This project aims to tackle the challenge of optimizing representation learning from Electronic Health Records (EHR) in the healthcare domain.  We propose an innovative approach employing Graph Neural Networks (GNN) to learn these interconnections in EHR data. Our heterogeneous graph network exhibits robustness in understanding graph structures, leading to adaptive performance enhancements across various predictive tasks in EHR. 
+Currently, we are training the baseline model named VGNN and plan to extend our dataset by creating multiple HADM IDs for each patient and aggregating lab-event features. We are also going to build our heterogeneous graph neural network.
 
 
-## Model Training
+## Data Preprocessing
+
+To train VGNN on our dataset, we have revised the preprocessing code. The code extracts train/valid/test datasets from raw MiMic3 csvs (`../../rawdata/mimic/`). Use the following command:
+
+```
+python3 preprocess_mimic.py --input_path ../../rawdata/mimic/
+```
+
+We have made the following revisions:
+* Set the path to read from our datasets and match the data type.
+* Make it optional to use lab-event features.
+* Map one patient to one HADM ID.
 
 
-### Prerequisites
+## BaselineModel VGNN Training
+
+We trained VGNN [Variationally Regularized Graph-based Representation Learning for Electronic Health Records](https://arxiv.org/abs/1912.03761) for mortality prediction using our dataset. The figure shows the archtecture of VGNN.
+
+<img src="https://github.com/NYUMedML/GNN_for_EHR/blob/master/plots/model.png" alt="drawing" width="600"/>
+
+
+
+### Train
+
+VGNN can be trained by running the command:
+
+```
+python3 train.py --data_path ./data/mimic/
+```
+
+We trained VGNN with different dropout rates, and the results of training can be found in the following directories:
+* `lr_0.0001-input_256-output_256-dropout_0.2/`
+* `lr_0.0001-input_256-output_256-dropout_0.4/`
+* `lr_0.0001-input_256-output_256-dropout_0.5/`
+
+Additionally, we added codes for evaluating the baseline by AUPRC on the test dataset.
+
+
+### Environment
 
 Required packages can be installed on **python3.6** environment via command:
 
@@ -18,24 +51,4 @@ Required packages can be installed on **python3.6** environment via command:
 pip3 install -r requirements.txt
 ```
 
-Nvidia GPU with Cuda 10.0 are required for training models.
-
-### Data
-
-The preprocessing tools that extracts medical code for datasets are enclosed in [data](https://github.com/NYUMedML/GNN_for_EHR/tree/master/data). Run the command:
-```
-python3 preprocess_{dataset}.py --input_path {dataset_path} --output_path {storage_path}
-```
-
-
-### Train
-
-GNN for EHR on predicting disease outcomes can be train by running command:
-
-```
-python3 train.py --data_path {storage_path} --embedding_size 512 --result_path {model_path}
-```
-
-## Architecture
-
-<img src="https://github.com/NYUMedML/GNN_for_EHR/blob/master/plots/model.png" alt="drawing" width="900"/>
+We revise `requirements.txt`  for our specific environment with an Nvidia GPU and Cuda 11.7.
